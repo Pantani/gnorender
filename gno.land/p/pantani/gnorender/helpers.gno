@@ -53,6 +53,25 @@ func escapeJSONString(s string) string {
 	return s
 }
 
+func joinNonEmpty(parts ...string) string {
+	var filtered []string
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		filtered = append(filtered, part)
+	}
+	return strings.Join(filtered, "\n\n")
+}
+
+func appendKVIfValue(pairs []KV, key, value string) []KV {
+	if strings.TrimSpace(value) == "" {
+		return pairs
+	}
+	return append(pairs, KV{Key: key, Value: value})
+}
+
 func pad(s string, width int, align Align) string {
 	if len(s) >= width {
 		return s

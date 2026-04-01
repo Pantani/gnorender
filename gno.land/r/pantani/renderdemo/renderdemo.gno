@@ -17,7 +17,7 @@ func Render(path string) string {
 				gnorender.Link{Label: "Realms", Target: "/r/"},
 				gnorender.Link{Label: "Render Demo"},
 			),
-			gnorender.DrawProgressBar("Showcase Coverage", 34, 34, 20),
+			gnorender.DrawProgressBar("Showcase Coverage", 52, 52, 20),
 			gnorender.DrawFilterBar(
 				"Filters",
 				gnorender.Filter{Label: "View", Value: "Showcase", Active: true},
@@ -210,6 +210,166 @@ func Render(path string) string {
 		),
 	)
 
+	workflowWidgets := gnorender.DrawSection(
+		"Workflow Widgets",
+		joinBlocks(
+			gnorender.DrawChecklist(
+				"DrawChecklist",
+				gnorender.ChecklistItem{Label: "Create client", Done: true},
+				gnorender.ChecklistItem{Label: "Relay packets"},
+				gnorender.ChecklistItem{Label: "Upgrade contract", Blocked: true, Note: "Waiting on audit"},
+			),
+			gnorender.DrawLegend(
+				"DrawLegend",
+				gnorender.LegendItem{Kind: gnorender.NoticeSuccess, Label: "Healthy", Description: "Everything looks good"},
+				gnorender.LegendItem{Kind: gnorender.NoticeWarning, Label: "Pending", Description: "Needs attention"},
+				gnorender.LegendItem{Kind: gnorender.NoticeError, Label: "Failed", Description: "Requires action"},
+			),
+			gnorender.DrawComparisonTable(
+				"DrawComparisonTable",
+				gnorender.ComparisonRow{Field: "Status", Before: "pending", After: "active"},
+				gnorender.ComparisonRow{Field: "Height", Before: "120", After: "121"},
+				gnorender.ComparisonRow{Field: "Fee", Before: "10", After: "10"},
+			),
+			gnorender.DrawEmptyStateWithAction(
+				"DrawEmptyStateWithAction",
+				"No balances yet.",
+				gnorender.Link{Label: "Create account", Target: "/r/pantani/renderdemo?tab=create"},
+			),
+			gnorender.DrawSection(
+				"DrawTabsNav",
+				gnorender.DrawTabsNav(
+					"overview",
+					gnorender.Tab{ID: "overview", Label: "Overview", Target: "/r/pantani/renderdemo"},
+					gnorender.Tab{ID: "methods", Label: "Methods", Target: "/r/pantani/renderdemo?tab=methods"},
+					gnorender.Tab{ID: "state", Label: "State", Target: "/r/pantani/renderdemo?tab=state"},
+				),
+			),
+		),
+	)
+
+	governanceAndTx := gnorender.DrawSection(
+		"Governance And Transactions",
+		joinBlocks(
+			gnorender.DrawVoteBreakdown(
+				"DrawVoteBreakdown",
+				gnorender.VoteBreakdown{Yes: 6, No: 2, Abstain: 1, Veto: 1},
+			),
+			gnorender.DrawGovernanceTally(
+				"DrawGovernanceTally",
+				gnorender.VoteBreakdown{Yes: 7, No: 2, Abstain: 1, Veto: 0},
+			),
+			gnorender.DrawEventLog(
+				"DrawEventLog",
+				gnorender.EventEntry{
+					Time:    "2026-04-01 12:00",
+					Type:    "transfer",
+					Summary: "packet sent",
+					Attributes: []gnorender.KV{
+						{Key: "sender", Value: "alice"},
+						{Key: "receiver", Value: "bob"},
+					},
+				},
+				gnorender.EventEntry{
+					Time:    "2026-04-01 12:01",
+					Type:    "ack",
+					Summary: "packet acknowledged",
+				},
+			),
+			gnorender.DrawTxReceipt(gnorender.TxReceipt{
+				Hash:      "ABCDEF1234567890FEDCBA",
+				Status:    gnorender.TxStatusSuccess,
+				Sender:    "g1abcdefghijklmno123456789pqrstuv",
+				Height:    "123",
+				GasWanted: "1000",
+				GasUsed:   "800",
+				Messages:  []string{"MsgSend", "MsgAck"},
+				Events: []gnorender.EventEntry{
+					{
+						Time:    "2026-04-01 12:00",
+						Type:    "transfer",
+						Summary: "packet sent",
+						Attributes: []gnorender.KV{
+							{Key: "amount", Value: "10ugnot"},
+						},
+					},
+				},
+			}),
+			gnorender.DrawProposalSummary(gnorender.ProposalSummary{
+				ID:       "7",
+				Title:    "Upgrade gnorender",
+				Status:   "Voting",
+				Proposer: "g1abcdefghijklmno123456789pqrstuv",
+				Summary:  "Adds richer UI widgets.",
+				Tally:    gnorender.VoteBreakdown{Yes: 7, No: 2, Abstain: 1, Veto: 0},
+			}),
+		),
+	)
+
+	gnoSpecific := gnorender.DrawSection(
+		"Gno-Specific Helpers",
+		joinBlocks(
+			gnorender.DrawRealmHeader(
+				"Render Demo",
+				"/r/pantani/renderdemo",
+				"g1abcdefghijklmno123456789pqrstuv",
+				"A showcase realm for gnorender.",
+			),
+			gnorender.DrawPackageHeader(
+				"gnorender",
+				"/p/pantani/gnorender",
+				"v0.1.0",
+			),
+			gnorender.DrawMethodList(
+				"DrawMethodList",
+				gnorender.Method{Name: "Render", Signature: "Render(path string) string", Description: "Renders the realm view"},
+				gnorender.Method{Name: "List", Signature: "List() []string", Description: "Lists demo entries"},
+			),
+			gnorender.DrawBalanceList(
+				"DrawBalanceList",
+				gnorender.CoinBalance{Denom: "ugnot", Amount: "1500", Value: "$15.00"},
+				gnorender.CoinBalance{Denom: "uatom", Amount: "250", Value: "$2.50"},
+			),
+			gnorender.DrawCoins(
+				"DrawCoins",
+				gnorender.CoinBalance{Denom: "ugnot", Amount: "1500", Value: "$15.00"},
+			),
+			gnorender.DrawValidatorList(
+				"DrawValidatorList",
+				gnorender.Validator{
+					Moniker:     "alpha",
+					Address:     "g1abcdefghijklmno123456789pqrstuv",
+					VotingPower: "100",
+					Status:      "bonded",
+				},
+				gnorender.Validator{
+					Moniker:     "beta",
+					Address:     "g1zyxwvutsrqponm987654321lkjihgf",
+					VotingPower: "80",
+					Status:      "jailed",
+				},
+			),
+			gnorender.DrawAddressBook(
+				"DrawAddressBook",
+				gnorender.AddressEntry{Name: "Treasury", Address: "g1abcdefghijklmno123456789pqrstuv", Note: "Main vault"},
+				gnorender.AddressEntry{Name: "Operator", Address: "g1zyxwvutsrqponm987654321lkjihgf", Note: "Ops wallet"},
+			),
+			gnorender.DrawContractMetadata(gnorender.ContractMetadata{
+				Name:        "Render Demo",
+				Path:        "/r/pantani/renderdemo",
+				Owner:       "g1abcdefghijklmno123456789pqrstuv",
+				Version:     "v1",
+				Description: "A realm used to preview helper output.",
+			}),
+			gnorender.DrawRealmIndex(
+				"DrawRealmIndex",
+				gnorender.RealmPage{Label: "Overview", Target: "/r/pantani/renderdemo", Description: "Landing page"},
+				gnorender.RealmPage{Label: "Methods", Target: "/r/pantani/renderdemo?tab=methods", Description: "API surface"},
+				gnorender.RealmPage{Label: "State", Target: "/r/pantani/renderdemo?tab=state", Description: "Current values"},
+			),
+		),
+	)
+
 	asciiHelpers := gnorender.DrawSection(
 		"ASCII Helpers",
 		joinBlocks(
@@ -270,6 +430,12 @@ func Render(path string) string {
 		historyAndState,
 		gnorender.DrawDivider(),
 		formsAndCallouts,
+		gnorender.DrawDivider(),
+		workflowWidgets,
+		gnorender.DrawDivider(),
+		governanceAndTx,
+		gnorender.DrawDivider(),
+		gnoSpecific,
 		gnorender.DrawDivider(),
 		asciiHelpers,
 		gnorender.DrawDivider(),

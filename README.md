@@ -1,68 +1,88 @@
 # gnorender
 
-`gnorender` is a small helper library for building `Render(path string) string`
-outputs in Gno packages and realms.
+`gnorender` is a rendering helper library for Gno packages and realms.
 
-This repository now keeps the package mirrored under its Gno import path and
-split by responsibility, so it is easier to maintain and evolve.
+It is designed to make `Render(path string) string` easier to compose with
+small Markdown-friendly helpers, higher-level workflow widgets, and
+Gno-specific presentation helpers.
 
 ## Repository Layout
 
 ```text
 .
-└── gno.land/p/pantani/gnorender
+├── .gitignore
+├── gnowork.toml
+├── README.md
+├── gno.land/p/pantani/gnorender
+│   ├── gnomod.toml
+│   ├── README.md
+│   ├── types.gno
+│   ├── helpers.gno
+│   ├── sections.gno
+│   ├── formatting.gno
+│   ├── panel.gno
+│   ├── navigation.gno
+│   ├── table.gno
+│   ├── widgets.gno
+│   ├── advanced_widgets.gno
+│   ├── gno_widgets.gno
+│   └── *_test.gno
+└── gno.land/r/pantani/renderdemo
     ├── gnomod.toml
     ├── README.md
-    ├── formatting.gno
-    ├── formatting_test.gno
-    ├── helpers.gno
-    ├── navigation.gno
-    ├── panel.gno
-    ├── sections.gno
-    ├── table.gno
-    ├── types.gno
-    ├── widgets.gno
-    ├── navigation_test.gno
-    ├── panel_test.gno
-    ├── sections_test.gno
-    ├── table_test.gno
-    └── widgets_test.gno
+    └── renderdemo.gno
 ```
 
-## What Lives Where
+## Package Map
 
-- `types.gno`: exported types and enums like `Table`, `Column`, `Metric`, and `Tab`
-- `sections.gno`: titles, sections, dividers, lists, description lists, and empty states
-- `formatting.gno`: ordered lists, status lines, badges, callouts, blockquotes, progress bars, and code blocks
-- `panel.gno`: boxed panel rendering
-- `navigation.gno`: links, tabs, and pager helpers
-- `table.gno`: markdown and ASCII table APIs plus rendering internals
-- `widgets.gno`: breadcrumbs, metrics, timelines, diffs, address helpers, filters, cards, forms, and objects
-- `helpers.gno`: shared string and formatting helpers
-- `*_test.gno`: tests grouped by feature area
+- `types.gno`: exported types and enums
+- `sections.gno`: titles, sections, lists, dividers, description lists, empty states
+- `formatting.gno`: ordered lists, badges, status lines, callouts, progress, code blocks
+- `panel.gno`: ASCII panel rendering
+- `navigation.gno`: links, link lists, tabs, pager helpers
+- `table.gno`: markdown and ASCII table rendering
+- `widgets.gno`: breadcrumbs, metrics, timelines, diffs, addresses, filters, forms, objects
+- `advanced_widgets.gno`: checklist, legend, comparison, event log, tx receipt, empty states with actions, linked tabs
+- `gno_widgets.gno`: realm/package headers, governance, balances, validators, address books, metadata, realm index
+- `helpers.gno`: shared formatting internals
 
-## Package Usage
+## What The Library Covers
 
-Import the package from:
+- Basic layout: titles, sections, dividers, lists, ordered lists, description lists
+- Navigation: links, breadcrumbs, tabs, linked tabs, filter bars, pagers
+- Formatting: badges, blockquotes, callouts, progress bars, code fences
+- Data views: markdown tables, ASCII tables, key/value tables, JSON-like objects
+- State and workflow: timelines, diffs, checklists, legends, empty states with actions
+- Transactions and governance: tx status, tx receipts, vote breakdowns, proposal summaries
+- Gno-specific views: realm headers, package headers, method lists, balances, validators, address books, metadata, realm indexes
+
+## Package Import
 
 ```go
 import "gno.land/p/pantani/gnorender"
 ```
 
-See the package guide in
-[`gno.land/p/pantani/gnorender/README.md`](./gno.land/p/pantani/gnorender/README.md)
-for the full helper catalog and examples.
+The full package guide lives in
+[`gno.land/p/pantani/gnorender/README.md`](./gno.land/p/pantani/gnorender/README.md).
+
+## Demo Realm
+
+The repository includes a showcase realm at
+[`gno.land/r/pantani/renderdemo`](./gno.land/r/pantani/renderdemo) that renders
+most helpers in one page for manual inspection in `gnoweb`.
 
 ## Running Tests
 
-From the repository root, use the command style available in your setup:
+From the repository root:
 
 ```sh
 gno test ./gno.land/p/pantani/gnorender
+gno test ./gno.land/r/pantani/renderdemo
 ```
 
-Or, if you expose Gno through `go tool`:
+If your setup exposes Gno through `go tool`:
 
 ```sh
 go tool gno test ./gno.land/p/pantani/gnorender
+go tool gno test ./gno.land/r/pantani/renderdemo
 ```

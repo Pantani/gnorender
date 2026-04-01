@@ -1,28 +1,29 @@
 # RenderDemo
 
-`RenderDemo` is a small showcase realm that imports
-`gno.land/p/pantani/gnorender` and renders a simple page using the helper
-library.
+`RenderDemo` is a showcase realm for `gno.land/p/pantani/gnorender`.
 
-It is useful for manually validating that the package composes well inside a
-real `Render(path string) string` function, including every exported helper and
-all exported types.
+It is meant for manual inspection in `gnoweb` and for quick compile checks in a
+local Gno workspace.
 
 ## Files
 
-- `renderdemo.gno`: the demo realm
-- `gnomod.toml`: the realm package path for local tooling
+- `renderdemo.gno`: the demo realm and showcase page
+- `gnomod.toml`: the local realm module path
 
-## Prerequisites
+The repository root includes `gnowork.toml`, so local Gno tooling can resolve
+the package dependency from the same workspace.
 
-- `gno` installed for local testing
-- `gnodev` installed if you want to open the realm in `gnoweb`
-- `gnokey` installed if you want to deploy to a remote network
+## What The Demo Shows
 
-This repository includes a root `gnowork.toml` so local Gno tooling can resolve
-the dependency on `gno.land/p/pantani/gnorender` from the same workspace.
+- core layout helpers such as sections, lists, dividers, tables, code blocks
+- navigation helpers such as breadcrumbs, tabs, linked tabs, filter bars, pagers
+- formatting helpers such as badges, callouts, blockquotes, progress bars
+- state and workflow helpers such as timelines, diffs, checklists, legends, empty states
+- transaction and governance helpers such as tx status, tx receipts, vote breakdowns, proposal summaries
+- Gno-specific helpers such as realm headers, package headers, balances, validators, metadata, and realm indexes
+- fenced ASCII output for `DrawPanel`, `DrawEmptyState`, and ASCII `Table.Render()`
 
-## Local Test
+## Local Compile Test
 
 From the repository root:
 
@@ -31,12 +32,12 @@ cd gno.land/r/pantani/renderdemo
 gno test . -v
 ```
 
-This checks that the realm compiles and that the import of
-`gno.land/p/pantani/gnorender` resolves correctly in the workspace.
+This validates that the realm compiles and that the workspace import of
+`gno.land/p/pantani/gnorender` resolves correctly.
 
-## Local Deploy And Manual Test
+## Local Manual Test
 
-To run the demo in a local node with hot reload:
+Start a local dev node:
 
 ```sh
 cd gno.land/r/pantani/renderdemo
@@ -49,48 +50,36 @@ Then open:
 http://127.0.0.1:8888/r/pantani/renderdemo
 ```
 
-You should see a page containing:
+When the page loads correctly, you should see:
 
-- `# Render Demo`
-- sections for overview, navigation, metrics, lists, data views, history/state, forms, ASCII helpers, and code samples
-- breadcrumbs, filter bars, pager, and tabs examples
-- badges, callouts, blockquotes, and a progress bar
-- metrics, stat grids, addresses, and tx statuses
-- timelines, diffs, object rendering, cards, and form previews
-- markdown tables created by both helper functions and `Table.Render()`
-- fenced ASCII output for `DrawPanel`, `DrawEmptyState`, and ASCII `Table.Render()`
-
-This is the quickest end-to-end way to verify the library visually.
+- `# Render Demo` at the top
+- an overview section with breadcrumbs, filters, tabs, pager, and coverage progress
+- dedicated sections for navigation, metrics, lists, data views, history/state, forms/callouts
+- workflow widgets including checklist, legend, comparison table, linked tabs, and empty state with action
+- governance and transaction widgets including vote breakdowns, event logs, tx receipt, and proposal summary
+- Gno-specific helper sections for realm/package metadata, method list, balances, validators, address book, and realm index
+- fenced ASCII previews for panel, empty state, and ASCII tables
 
 ## Remote Deployment
 
-For remote deployment with `gnokey`, there is one important caveat:
+For remote deployment with `gnokey`, note that official Gno deployment docs
+currently describe address-based namespaces for on-chain packages and realms.
 
-- current official Gno docs say remote deployments should use an address-based namespace such as `gno.land/r/<your_address>/renderdemo`
-- current official Gno docs also say username-based namespaces are not currently supported for deployment
-
-Because this demo currently uses:
+This demo currently uses:
 
 ```toml
 module = "gno.land/r/pantani/renderdemo"
 ```
 
-you will likely need to switch it to your address-based path before deploying to
-a remote network.
+That is convenient for local workspace testing, but for remote deployment you
+will likely need to switch both the realm path and imported package path to your
+address-based namespace.
 
-You will also need the helper package deployed on-chain under a matching import
-path. Since the demo imports:
+Typical flow:
 
-```go
-import "gno.land/p/pantani/gnorender"
-```
-
-that package path must exist on the target network too. If you are deploying to
-staging or another remote network, the usual flow is:
-
-1. Deploy the pure package under your own address-based namespace.
-2. Update the realm import to that deployed package path.
-3. Update this realm's `gnomod.toml` module path to your address-based realm path.
+1. Deploy the pure package under your address-based `gno.land/p/...` path.
+2. Update the demo import to that deployed package path.
+3. Update this realm `gnomod.toml` to your address-based `gno.land/r/...` path.
 4. Deploy the realm with `gnokey maketx addpkg`.
 
 Example command shape:
@@ -107,15 +96,8 @@ gnokey maketx addpkg \
   MyKey
 ```
 
-If deployment succeeds, open the deployed realm in `gnoweb` at:
+After deployment, open:
 
 ```text
 https://gno.land/r/<your_address>/renderdemo
 ```
-
-## References
-
-- Running and testing code: https://docs.gno.land/resources/gno-testing/
-- Configuring Gno projects: https://docs.gno.land/resources/configuring-gno-projects/
-- Running a local dev node: https://docs.gno.land/builders/local-dev-with-gnodev/
-- Deploying packages: https://docs.gno.land/builders/deploy-packages/

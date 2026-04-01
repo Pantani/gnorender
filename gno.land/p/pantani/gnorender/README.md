@@ -1,10 +1,10 @@
 # gnorender
 
-`gnorender` is a small rendering helper library for Gno packages and realms.
+`gnorender` is a rendering helper library for Gno packages and realms.
 
-It focuses on the most common output patterns used inside
-`Render(path string) string` implementations, helping contracts and packages keep
-their render logic simple, consistent, and easier to maintain.
+It keeps `Render(path string) string` implementations small and composable by
+providing helpers for layout, navigation, data presentation, workflow/status
+views, and Gno-specific contract metadata.
 
 ## Import
 
@@ -12,718 +12,241 @@ their render logic simple, consistent, and easier to maintain.
 import "gno.land/p/pantani/gnorender"
 ```
 
-## What The Package Covers
+## Feature Overview
 
-- Titles and sections
-- Markdown tables
-- ASCII tables
-- Panels and empty states
-- Bullet and ordered lists
-- Description lists
-- Links and link lists
-- Breadcrumbs
-- Tabs and pager links
-- Status lines
-- Badges and callouts
-- Blockquotes and progress bars
-- Metrics and stat grids
-- Timelines and diffs
-- Address and transaction helpers
-- Filter bars, cards, and forms
-- Object rendering
-- Code blocks
+- Structure: titles, sections, dividers, bullet lists, ordered lists, description lists
+- Navigation: links, link lists, breadcrumbs, tabs, linked tabs, pagers, filter bars
+- Formatting: status lines, badges, blockquotes, callouts, progress bars, code blocks
+- Data views: markdown tables, ASCII tables, key/value tables, comparison tables, object rendering
+- Workflow widgets: checklists, timelines, diffs, legends, event logs, empty states with actions
+- Transactions and governance: addresses, tx status, tx receipts, vote breakdowns, proposal summaries
+- Gno-specific helpers: realm/package headers, method lists, balances, validators, address books, metadata, realm indexes
 
 ## File Organization
 
-The package is split by responsibility:
-
-- `types.gno`: exported enums and structs
-- `sections.gno`: titles, sections, dividers, lists, description lists, and empty states
-- `formatting.gno`: ordered lists, status lines, badges, callouts, blockquotes, progress bars, and code blocks
-- `panel.gno`: box rendering helpers
-- `navigation.gno`: links, tabs, pager helpers
+- `types.gno`: exported types and enums
+- `sections.gno`: titles, sections, dividers, lists, description lists, empty states
+- `formatting.gno`: ordered lists, status lines, badges, blockquotes, callouts, progress bars, code blocks
+- `panel.gno`: ASCII panel rendering
+- `navigation.gno`: links, link lists, tabs, linked tabs, pager helpers
 - `table.gno`: markdown and ASCII tables
-- `widgets.gno`: breadcrumbs, metrics, timelines, diffs, address helpers, filters, cards, forms, and objects
-- `helpers.gno`: shared string formatting helpers
+- `widgets.gno`: breadcrumbs, metrics, timelines, diffs, addresses, filters, cards, forms, objects
+- `advanced_widgets.gno`: checklist, legend, comparison, event log, tx receipt, empty states with actions, linked tabs
+- `gno_widgets.gno`: realm/package metadata, governance, balances, validators, address books, realm index
+- `helpers.gno`: shared formatting helpers
 
 ## Exported Types
 
-```go
-type Format string
+Table rendering:
 
-const (
-	FormatMarkdown Format = "markdown"
-	FormatASCII    Format = "ascii"
-)
+- `Format`, `Align`, `Column`, `Table`
 
-type Align string
+Shared data:
 
-const (
-	AlignLeft   Align = "left"
-	AlignCenter Align = "center"
-	AlignRight  Align = "right"
-)
+- `KV`, `Link`, `Tab`
 
-type Column struct {
-	Label string
-	Align Align
-	Width int
-}
+Workflow and status:
 
-type Table struct {
-	Title   string
-	Columns []Column
-	Rows    [][]string
-	Empty   string
-	Format  Format
-}
+- `NoticeKind`, `ChecklistItem`, `TimelineItem`, `VoteBreakdown`, `EventEntry`
+- `ComparisonRow`, `LegendItem`
 
-type KV struct {
-	Key   string
-	Value string
-}
+Metrics and forms:
 
-type Link struct {
-	Label  string
-	Target string
-}
+- `Metric`, `Filter`, `Field`
 
-type Metric struct {
-	Label string
-	Value string
-	Delta string
-	Kind  NoticeKind
-}
+Transactions and addresses:
 
-type Tab struct {
-	ID    string
-	Label string
-}
+- `AddressFormat`, `TxStatusKind`, `TxReceipt`
 
-type NoticeKind string
+Gno-specific domain types:
 
-const (
-	NoticeInfo    NoticeKind = "info"
-	NoticeSuccess NoticeKind = "success"
-	NoticeWarning NoticeKind = "warning"
-	NoticeError   NoticeKind = "error"
-)
-
-type TimelineItem struct {
-	Time  string
-	Title string
-	Body  string
-	Kind  NoticeKind
-}
-
-type Filter struct {
-	Label  string
-	Value  string
-	Target string
-	Active bool
-}
-
-type Field struct {
-	Label    string
-	Value    string
-	Hint     string
-	Required bool
-}
-
-type AddressFormat string
-
-const (
-	AddressFormatShort AddressFormat = "short"
-	AddressFormatLong  AddressFormat = "long"
-)
-
-type TxStatusKind string
-
-const (
-	TxStatusPending TxStatusKind = "pending"
-	TxStatusSuccess TxStatusKind = "success"
-	TxStatusFailed  TxStatusKind = "failed"
-	TxStatusExpired TxStatusKind = "expired"
-)
-```
-
-`Format`, `Align`, `Column`, and `Table` are used together through
-`Table.Render()`. `KV` is used by `DrawKVTable` and `DrawDescriptionList`,
-`Link` is used by `DrawLinkList` and `DrawBreadcrumbs`, `Metric` is used by
-`DrawMetric` and `DrawStatGrid`, `Tab` is used by `DrawTabs`,
-`TimelineItem` is used by `DrawTimeline`, `Filter` is used by `DrawFilterBar`,
-`Field` is used by `DrawField` and `DrawFormPreview`, `NoticeKind` is used by
-`DrawBadge` and `DrawCallout`, and `TxStatusKind` is used by `DrawTxStatus`.
+- `Method`, `CoinBalance`, `ProposalSummary`, `Validator`
+- `AddressEntry`, `ContractMetadata`, `RealmPage`
 
 ## Quick Start
 
 ```go
-func Render(path string) string {
-	title := gnorender.DrawTitle("IBC Transfer")
-	status := gnorender.DrawStatus("Client", "active")
-	tabs := gnorender.DrawTabs(
-		"clients",
-		gnorender.Tab{ID: "overview", Label: "Overview"},
-		gnorender.Tab{ID: "clients", Label: "Clients"},
-	)
-	table := gnorender.DrawTable(
-		[]string{"Client", "Status"},
-		[]string{"07-tendermint-1", "active"},
-	)
+package demo
 
-	return title + "\n\n" + status + "\n\n" + tabs + "\n\n" + table
+import "gno.land/p/pantani/gnorender"
+
+func Render(path string) string {
+	return gnorender.DrawTitle("IBC Dashboard") + "\n\n" +
+		gnorender.DrawBreadcrumbs(
+			gnorender.Link{Label: "Home", Target: "/"},
+			gnorender.Link{Label: "Realms", Target: "/r/"},
+			gnorender.Link{Label: "IBC Dashboard"},
+		) + "\n\n" +
+		gnorender.DrawTabsNav(
+			"overview",
+			gnorender.Tab{ID: "overview", Label: "Overview", Target: "/r/demo"},
+			gnorender.Tab{ID: "packets", Label: "Packets", Target: "/r/demo?tab=packets"},
+		) + "\n\n" +
+		gnorender.DrawStatGrid(
+			"Stats",
+			gnorender.Metric{Label: "Packets", Value: "128", Delta: "+18", Kind: gnorender.NoticeSuccess},
+			gnorender.Metric{Label: "Pending", Value: "7", Delta: "-3", Kind: gnorender.NoticeWarning},
+		)
 }
 ```
 
-Output:
-
-```md
-# IBC Transfer
-
-**Client:** active
-
-Overview | [Clients]
-
-| Client | Status |
-| :--- | :--- |
-| 07-tendermint-1 | active |
-```
-
-## Helper Catalog
-
-### DrawTitle
-
-```go
-gnorender.DrawTitle("IBC Transfer")
-```
-
-Output:
-
-```md
-# IBC Transfer
-```
-
-### DrawSection
-
-```go
-gnorender.DrawSection("Clients", "Registered relayers")
-```
-
-Output:
-
-```md
-## Clients
-
-Registered relayers
-```
-
-### DrawDivider
-
-```go
-gnorender.DrawDivider()
-```
-
-Output:
-
-```md
----
-```
-
-### DrawList
-
-```go
-gnorender.DrawList("Ports", []string{"transfer", "bank"})
-```
-
-Output:
-
-```md
-## Ports
-
-- transfer
-- bank
-```
-
-### DrawOrderedList
-
-```go
-gnorender.DrawOrderedList("Steps", []string{"Create client", "Send packet"})
-```
-
-Output:
-
-```md
-## Steps
-
-1. Create client
-2. Send packet
-```
-
-### DrawDescriptionList
-
-```go
-gnorender.DrawDescriptionList(
-	"Metadata",
-	gnorender.KV{Key: "Source", Value: "AtomOne"},
-	gnorender.KV{Key: "Destination", Value: "Gno"},
-)
-```
-
-Output:
-
-```md
-## Metadata
-
-- **Source:** AtomOne
-- **Destination:** Gno
-```
-
-### DrawStatus
-
-```go
-gnorender.DrawStatus("Client", "active")
-```
-
-Output:
-
-```md
-**Client:** active
-```
-
-### DrawBadge
-
-```go
-gnorender.DrawBadge(gnorender.NoticeSuccess, "Ready")
-```
-
-Output:
-
-```md
-🟢 Ready
-```
-
-### DrawBlockquote
-
-```go
-gnorender.DrawBlockquote("Lightweight note\nwith multiple lines.")
-```
-
-Output:
-
-```md
-> Lightweight note
-> with multiple lines.
-```
-
-### DrawCallout
-
-```go
-gnorender.DrawCallout(
-	gnorender.NoticeWarning,
-	"Pending packets",
-	"Drain the queue before upgrade.",
-)
-```
-
-Output:
-
-```md
-> **🟡 Warning: Pending packets**
->
-> Drain the queue before upgrade.
-```
-
-### DrawProgressBar
-
-```go
-gnorender.DrawProgressBar("Sync", 3, 10, 10)
-```
-
-Output:
-
-```md
-**Sync:** `[###-------] 30% (3/10)`
-```
-
-### DrawCodeBlock
-
-```go
-gnorender.DrawCodeBlock("json", "{\"ok\":true}")
-```
-
-Output:
-
-````text
-```json
-{"ok":true}
-```
-````
-
-### DrawPanel
-
-```go
-gnorender.DrawPanel("Transfer", "Escrow ready\nVoucher minted")
-```
-
-Output:
-
-```text
-+----------------+
-|    Transfer    |
-+----------------+
-| Escrow ready   |
-| Voucher minted |
-+----------------+
-```
-
-When rendering inside Markdown surfaces such as `gnoweb`, wrap ASCII output in
-`DrawCodeBlock` so spacing and line breaks are preserved:
-
-```go
-gnorender.DrawCodeBlock("text", gnorender.DrawPanel("Transfer", "Escrow ready\nVoucher minted"))
-```
-
-### DrawEmptyState
-
-```go
-gnorender.DrawEmptyState("Balances", "")
-```
-
-Output:
-
-```text
-+----------+
-| Balances |
-+----------+
-| No data. |
-+----------+
-```
-
-Custom body:
-
-```go
-gnorender.DrawEmptyState("Balances", "No vouchers minted yet.")
-```
-
-Output:
-
-```text
-+-------------------------+
-|        Balances         |
-+-------------------------+
-| No vouchers minted yet. |
-+-------------------------+
-```
-
-### DrawLink
-
-```go
-gnorender.DrawLink("Package Docs", "/p/pantani/gnorender")
-```
-
-Output:
-
-```md
-[Package Docs](/p/pantani/gnorender)
-```
-
-### DrawLinkList
-
-```go
-gnorender.DrawLinkList(
-	"Links",
-	gnorender.Link{Label: "Package Docs", Target: "/p/pantani/gnorender"},
-	gnorender.Link{Label: "Demo Realm", Target: "/r/pantani/renderdemo"},
-)
-```
-
-Output:
-
-```md
-## Links
-
-- [Package Docs](/p/pantani/gnorender)
-- [Demo Realm](/r/pantani/renderdemo)
-```
-
-### Higher-Level Widgets
-
-The package also includes higher-level helpers that build on the primitives:
-
-- `DrawBreadcrumbs`
-- `DrawMetric`
-- `DrawStatGrid`
-- `DrawTimeline`
-- `DrawDiff`
-- `DrawAddress`
-- `DrawTxStatus`
-- `DrawFilterBar`
+## Helper Groups
+
+Layout and sections:
+
+- `DrawTitle`
+- `DrawSection`
+- `DrawDivider`
+- `DrawList`
+- `DrawOrderedList`
+- `DrawDescriptionList`
+- `DrawStatus`
+
+Formatting and emphasis:
+
+- `DrawBadge`
+- `DrawBlockquote`
+- `DrawCallout`
+- `DrawProgressBar`
+- `DrawCodeBlock`
+- `DrawPanel`
+- `DrawEmptyState`
+- `DrawEmptyStateWithAction`
 - `DrawCard`
-- `DrawField`
-- `DrawFormPreview`
+
+Navigation:
+
+- `DrawLink`
+- `DrawLinkList`
+- `DrawBreadcrumbs`
+- `DrawTabs`
+- `DrawTabsNav`
+- `DrawPager`
+- `DrawFilterBar`
+
+Tables and object rendering:
+
+- `DrawTable`
+- `DrawTableWithTitle`
+- `DrawKVTable`
+- `Table.Render()`
+- `DrawComparisonTable`
 - `DrawObject`
 
-The easiest way to see them all together is the `renderdemo` realm in this
-repository.
+Metrics, forms, and state:
 
-### DrawTabs
+- `DrawMetric`
+- `DrawStatGrid`
+- `DrawField`
+- `DrawFormPreview`
+- `DrawTimeline`
+- `DrawDiff`
+- `DrawChecklist`
+- `DrawLegend`
+- `DrawEventLog`
 
-```go
-gnorender.DrawTabs(
-	"clients",
-	gnorender.Tab{ID: "overview", Label: "Overview"},
-	gnorender.Tab{ID: "clients", Label: "Clients"},
-)
-```
+Transactions and governance:
 
-Output:
+- `DrawAddress`
+- `DrawTxStatus`
+- `DrawTxReceipt`
+- `DrawVoteBreakdown`
+- `DrawGovernanceTally`
+- `DrawProposalSummary`
 
-```text
-Overview | [Clients]
-```
+Gno-specific helpers:
 
-When `Tab.Label` is empty, `DrawTabs` falls back to `Tab.ID`:
+- `DrawRealmHeader`
+- `DrawPackageHeader`
+- `DrawMethodList`
+- `DrawBalanceList`
+- `DrawCoins`
+- `DrawValidatorList`
+- `DrawAddressBook`
+- `DrawContractMetadata`
+- `DrawRealmIndex`
 
-```go
-gnorender.DrawTabs(
-	"transfers",
-	gnorender.Tab{ID: "overview", Label: "Overview"},
-	gnorender.Tab{ID: "transfers"},
-)
-```
+## Common Patterns
 
-Output:
-
-```text
-Overview | [transfers]
-```
-
-### DrawPager
-
-```go
-gnorender.DrawPager(2, 4, "/r/demo/render")
-```
-
-Output:
-
-```md
-Page 2/4 | [Prev](/r/demo/render?page=1) | [Next](/r/demo/render?page=3)
-```
-
-When the base path already has query params, `DrawPager` appends with `&`:
-
-```go
-gnorender.DrawPager(3, 5, "/r/demo/render?limit=20")
-```
-
-Output:
-
-```md
-Page 3/5 | [Prev](/r/demo/render?limit=20&page=2) | [Next](/r/demo/render?limit=20&page=4)
-```
-
-### DrawTable
+### Markdown Tables
 
 ```go
 gnorender.DrawTable(
 	[]string{"Client", "Status"},
 	[]string{"07-tendermint-1", "active"},
+	[]string{"07-tendermint-2", "frozen"},
 )
 ```
 
-Output:
-
-```md
-| Client | Status |
-| :--- | :--- |
-| 07-tendermint-1 | active |
-```
-
-### DrawTableWithTitle
+### Linked Tabs
 
 ```go
-gnorender.DrawTableWithTitle(
-	"Clients",
-	[]string{"Client", "Status"},
-	[]string{"07-tendermint-1", "active"},
-	[]string{"10-gno-1", "frozen"},
+gnorender.DrawTabsNav(
+	"overview",
+	gnorender.Tab{ID: "overview", Label: "Overview", Target: "/r/demo"},
+	gnorender.Tab{ID: "methods", Label: "Methods", Target: "/r/demo?tab=methods"},
+	gnorender.Tab{ID: "state", Label: "State", Target: "/r/demo?tab=state"},
 )
 ```
 
-Output:
-
-```md
-### Clients
-
-| Client | Status |
-| :--- | :--- |
-| 07-tendermint-1 | active |
-| 10-gno-1 | frozen |
-```
-
-### DrawKVTable
+### Checklist and Callouts
 
 ```go
-gnorender.DrawKVTable(
-	"Metadata",
-	gnorender.KV{Key: "Source", Value: "AtomOne"},
-	gnorender.KV{Key: "Destination", Value: "Gno"},
+gnorender.DrawChecklist(
+	"Upgrade Checklist",
+	gnorender.ChecklistItem{Label: "Drain packets", Done: true},
+	gnorender.ChecklistItem{Label: "Run migration"},
+	gnorender.ChecklistItem{Label: "Broadcast proposal", Blocked: true, Note: "Waiting on multisig"},
 )
 ```
 
-Output:
-
-```md
-### Metadata
-
-| Key | Value |
-| :--- | :--- |
-| Source | AtomOne |
-| Destination | Gno |
-```
-
-## Using Table.Render
-
-`Table.Render()` is the configurable entry point for advanced table output. It
-uses:
-
-- `FormatMarkdown` or `FormatASCII`
-- `Column.Align` for left, center, or right alignment
-- `Column.Width` as a minimum width hint
-- `Empty` as the empty-table message
-
-### Markdown Table via Table
+### Transaction Receipt
 
 ```go
-table := gnorender.Table{
-	Title: "Clients",
-	Columns: []gnorender.Column{
-		{Label: "ID"},
-		{Label: "Status"},
-	},
-	Rows: [][]string{
-		{"07-tendermint-1", "active"},
-	},
-	Format: gnorender.FormatMarkdown,
-}
-
-table.Render()
+gnorender.DrawTxReceipt(gnorender.TxReceipt{
+	Hash:      "ABCDEF1234567890FEDCBA",
+	Status:    gnorender.TxStatusSuccess,
+	Sender:    "g1abcdefghijklmno123456789pqrstuv",
+	Height:    "123",
+	GasWanted: "1000",
+	GasUsed:   "800",
+	Messages:  []string{"MsgSend"},
+})
 ```
 
-Output:
-
-```md
-### Clients
-
-| ID | Status |
-| :--- | :--- |
-| 07-tendermint-1 | active |
-```
-
-### ASCII Table With Alignment And Width
+### Gno Realm Header
 
 ```go
-table := gnorender.Table{
-	Title: "Stats",
-	Columns: []gnorender.Column{
-		{Label: "Metric", Width: 8},
-		{Label: "Value", Align: gnorender.AlignCenter, Width: 7},
-		{Label: "Delta", Align: gnorender.AlignRight, Width: 6},
-	},
-	Rows: [][]string{
-		{"Supply", "120", "+4"},
-	},
-	Format: gnorender.FormatASCII,
-}
-
-table.Render()
+gnorender.DrawRealmHeader(
+	"Render Demo",
+	"/r/pantani/renderdemo",
+	"g1abcdefghijklmno123456789pqrstuv",
+	"A showcase realm for gnorender.",
+)
 ```
 
-Output:
+## Notes
 
-```text
-Stats
-+----------+---------+--------+
-| Metric   |  Value  |  Delta |
-+----------+---------+--------+
-| Supply   |   120   |     +4 |
-+----------+---------+--------+
+- `DrawPanel`, `DrawEmptyState`, and other ASCII-heavy helpers should usually be wrapped in `DrawCodeBlock("text", ...)` when rendered through `gnoweb`
+- `DrawLink` normalizes exact root section links like `/r`, `/p`, and `/e` into `/r/`, `/p/`, and `/e/`
+- `DrawTabs` is visual-only, while `DrawTabsNav` is intended for clickable tab navigation
+
+## Demo Realm
+
+The repository includes a showcase realm at
+`gno.land/r/pantani/renderdemo`. It renders the helper catalog in one page so
+you can visually inspect output in `gnoweb`.
+
+## Testing
+
+From the repository root:
+
+```sh
+gno test ./gno.land/p/pantani/gnorender
 ```
 
-### Empty Markdown Table
+Or:
 
-```go
-table := gnorender.Table{
-	Title: "Clients",
-	Columns: []gnorender.Column{
-		{Label: "ID"},
-		{Label: "Status"},
-	},
-}
-
-table.Render()
+```sh
+go tool gno test ./gno.land/p/pantani/gnorender
 ```
-
-Output:
-
-```md
-### Clients
-
-| ID | Status |
-| :--- | :--- |
-| No data. |  |
-```
-
-### Empty ASCII Table
-
-```go
-table := gnorender.Table{
-	Title: "Clients",
-	Columns: []gnorender.Column{
-		{Label: "ID"},
-		{Label: "Status"},
-	},
-	Format: gnorender.FormatASCII,
-	Empty:  "No registered clients.",
-}
-
-table.Render()
-```
-
-Output:
-
-```text
-Clients
-+----+-------------------+
-| ID | Status            |
-+----+-------------------+
-| No registered clients. |
-+----+-------------------+
-```
-
-### Table Without Columns
-
-```go
-gnorender.Table{
-	Title: "Summary",
-	Empty: "Nothing to show.",
-}.Render()
-```
-
-Output:
-
-```md
-## Summary
-
-Nothing to show.
-```
-
-## Behavior Notes
-
-- Markdown tables escape `|` and convert line breaks inside cells to `<br>`.
-- Empty markdown tables render a single row with the empty message in the first column.
-- Empty ASCII tables widen themselves when needed so the empty message fits inside the border.
-- Semantic colors are exposed through badges and callouts using colored icons so they remain visible in Markdown renderers.
-- ASCII helpers such as `DrawPanel` and `DrawEmptyState` should be wrapped with `DrawCodeBlock` when shown through Markdown renderers like `gnoweb`.
-- `DrawAddress` and `DrawTxStatus` shorten long identifiers in their compact forms to keep render output readable.
-- `DrawPager` appends `?page=N` or `&page=N` automatically.

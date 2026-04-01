@@ -39,6 +39,13 @@ type Link struct {
 	Target string
 }
 
+type ChecklistItem struct {
+	Label   string
+	Done    bool
+	Blocked bool
+	Note    string
+}
+
 type Metric struct {
 	Label string
 	Value string
@@ -47,8 +54,9 @@ type Metric struct {
 }
 
 type Tab struct {
-	ID    string
-	Label string
+	ID     string
+	Label  string
+	Target string
 }
 
 type NoticeKind string
@@ -65,6 +73,32 @@ type TimelineItem struct {
 	Title string
 	Body  string
 	Kind  NoticeKind
+}
+
+type VoteBreakdown struct {
+	Yes     int
+	No      int
+	Abstain int
+	Veto    int
+}
+
+type EventEntry struct {
+	Time       string
+	Type       string
+	Summary    string
+	Attributes []KV
+}
+
+type ComparisonRow struct {
+	Field  string
+	Before string
+	After  string
+}
+
+type LegendItem struct {
+	Kind        NoticeKind
+	Label       string
+	Description string
 }
 
 type Filter struct {
@@ -96,3 +130,62 @@ const (
 	TxStatusFailed  TxStatusKind = "failed"
 	TxStatusExpired TxStatusKind = "expired"
 )
+
+type TxReceipt struct {
+	Hash      string
+	Status    TxStatusKind
+	Sender    string
+	Height    string
+	GasWanted string
+	GasUsed   string
+	Messages  []string
+	Events    []EventEntry
+}
+
+type Method struct {
+	Name        string
+	Signature   string
+	Description string
+}
+
+type CoinBalance struct {
+	Denom  string
+	Amount string
+	Value  string
+}
+
+type ProposalSummary struct {
+	ID       string
+	Title    string
+	Status   string
+	Proposer string
+	Summary  string
+	Tally    VoteBreakdown
+}
+
+type Validator struct {
+	Moniker     string
+	Address     string
+	VotingPower string
+	Status      string
+}
+
+type AddressEntry struct {
+	Name    string
+	Address string
+	Note    string
+}
+
+type ContractMetadata struct {
+	Name        string
+	Path        string
+	Owner       string
+	Version     string
+	Description string
+}
+
+type RealmPage struct {
+	Label       string
+	Target      string
+	Description string
+}
