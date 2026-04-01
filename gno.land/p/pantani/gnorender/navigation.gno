@@ -8,7 +8,7 @@ import (
 
 func DrawLink(label, target string) string {
 	label = normalizeInline(label)
-	target = strings.TrimSpace(target)
+	target = normalizeNavTarget(strings.TrimSpace(target))
 	if label == "" {
 		label = target
 	}
@@ -80,4 +80,13 @@ func DrawPager(page, total int, basePath string) string {
 		parts = append(parts, markdownLink("Next", pageLink(basePath, page+1)))
 	}
 	return strings.Join(parts, " | ")
+}
+
+func normalizeNavTarget(target string) string {
+	switch target {
+	case "/r", "/p", "/e":
+		return target + "/"
+	default:
+		return target
+	}
 }

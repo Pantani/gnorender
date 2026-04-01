@@ -25,6 +25,12 @@ func TestDrawLinkAndLinkList(t *testing.T) {
 	uassert.Equal(t, "## Links\n\n- [Package Docs](/p/pantani/gnorender)\n- [/r/pantani/renderdemo](/r/pantani/renderdemo)", list)
 }
 
+func TestDrawLinkNormalizesRootSections(t *testing.T) {
+	uassert.Equal(t, "[Realms](/r/)", DrawLink("Realms", "/r"))
+	uassert.Equal(t, "[Packages](/p/)", DrawLink("Packages", "/p"))
+	uassert.Equal(t, "[Examples](/e/)", DrawLink("Examples", "/e"))
+}
+
 func TestDrawTabsLabelFallback(t *testing.T) {
 	got := DrawTabs("transfers",
 		Tab{ID: "overview", Label: "Overview"},

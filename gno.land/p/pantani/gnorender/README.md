@@ -21,10 +21,16 @@ import "gno.land/p/pantani/gnorender"
 - Bullet and ordered lists
 - Description lists
 - Links and link lists
+- Breadcrumbs
 - Tabs and pager links
 - Status lines
 - Badges and callouts
 - Blockquotes and progress bars
+- Metrics and stat grids
+- Timelines and diffs
+- Address and transaction helpers
+- Filter bars, cards, and forms
+- Object rendering
 - Code blocks
 
 ## File Organization
@@ -37,6 +43,7 @@ The package is split by responsibility:
 - `panel.gno`: box rendering helpers
 - `navigation.gno`: links, tabs, pager helpers
 - `table.gno`: markdown and ASCII tables
+- `widgets.gno`: breadcrumbs, metrics, timelines, diffs, address helpers, filters, cards, forms, and objects
 - `helpers.gno`: shared string formatting helpers
 
 ## Exported Types
@@ -81,6 +88,13 @@ type Link struct {
 	Target string
 }
 
+type Metric struct {
+	Label string
+	Value string
+	Delta string
+	Kind  NoticeKind
+}
+
 type Tab struct {
 	ID    string
 	Label string
@@ -94,12 +108,52 @@ const (
 	NoticeWarning NoticeKind = "warning"
 	NoticeError   NoticeKind = "error"
 )
+
+type TimelineItem struct {
+	Time  string
+	Title string
+	Body  string
+	Kind  NoticeKind
+}
+
+type Filter struct {
+	Label  string
+	Value  string
+	Target string
+	Active bool
+}
+
+type Field struct {
+	Label    string
+	Value    string
+	Hint     string
+	Required bool
+}
+
+type AddressFormat string
+
+const (
+	AddressFormatShort AddressFormat = "short"
+	AddressFormatLong  AddressFormat = "long"
+)
+
+type TxStatusKind string
+
+const (
+	TxStatusPending TxStatusKind = "pending"
+	TxStatusSuccess TxStatusKind = "success"
+	TxStatusFailed  TxStatusKind = "failed"
+	TxStatusExpired TxStatusKind = "expired"
+)
 ```
 
 `Format`, `Align`, `Column`, and `Table` are used together through
 `Table.Render()`. `KV` is used by `DrawKVTable` and `DrawDescriptionList`,
-`Link` is used by `DrawLinkList`, `Tab` is used by `DrawTabs`, and
-`NoticeKind` is used by `DrawBadge` and `DrawCallout`.
+`Link` is used by `DrawLinkList` and `DrawBreadcrumbs`, `Metric` is used by
+`DrawMetric` and `DrawStatGrid`, `Tab` is used by `DrawTabs`,
+`TimelineItem` is used by `DrawTimeline`, `Filter` is used by `DrawFilterBar`,
+`Field` is used by `DrawField` and `DrawFormPreview`, `NoticeKind` is used by
+`DrawBadge` and `DrawCallout`, and `TxStatusKind` is used by `DrawTxStatus`.
 
 ## Quick Start
 
@@ -392,6 +446,26 @@ Output:
 - [Demo Realm](/r/pantani/renderdemo)
 ```
 
+### Higher-Level Widgets
+
+The package also includes higher-level helpers that build on the primitives:
+
+- `DrawBreadcrumbs`
+- `DrawMetric`
+- `DrawStatGrid`
+- `DrawTimeline`
+- `DrawDiff`
+- `DrawAddress`
+- `DrawTxStatus`
+- `DrawFilterBar`
+- `DrawCard`
+- `DrawField`
+- `DrawFormPreview`
+- `DrawObject`
+
+The easiest way to see them all together is the `renderdemo` realm in this
+repository.
+
 ### DrawTabs
 
 ```go
@@ -651,4 +725,5 @@ Nothing to show.
 - Empty ASCII tables widen themselves when needed so the empty message fits inside the border.
 - Semantic colors are exposed through badges and callouts using colored icons so they remain visible in Markdown renderers.
 - ASCII helpers such as `DrawPanel` and `DrawEmptyState` should be wrapped with `DrawCodeBlock` when shown through Markdown renderers like `gnoweb`.
+- `DrawAddress` and `DrawTxStatus` shorten long identifiers in their compact forms to keep render output readable.
 - `DrawPager` appends `?page=N` or `&page=N` automatically.

@@ -32,6 +32,27 @@ func normalizeMarkdownCell(s string) string {
 	return strings.TrimSpace(s)
 }
 
+func shortenMiddle(s string, prefix, suffix int) string {
+	if prefix < 0 {
+		prefix = 0
+	}
+	if suffix < 0 {
+		suffix = 0
+	}
+	if len(s) <= prefix+suffix+3 {
+		return s
+	}
+	return s[:prefix] + "..." + s[len(s)-suffix:]
+}
+
+func escapeJSONString(s string) string {
+	s = strings.Join(strings.Split(s, `\`), `\\`)
+	s = strings.Join(strings.Split(s, `"`), `\"`)
+	s = strings.Join(strings.Split(s, "\r"), "")
+	s = strings.Join(strings.Split(s, "\n"), `\n`)
+	return s
+}
+
 func pad(s string, width int, align Align) string {
 	if len(s) >= width {
 		return s

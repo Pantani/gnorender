@@ -39,6 +39,13 @@ type Link struct {
 	Target string
 }
 
+type Metric struct {
+	Label string
+	Value string
+	Delta string
+	Kind  NoticeKind
+}
+
 type Tab struct {
 	ID    string
 	Label string
@@ -51,4 +58,41 @@ const (
 	NoticeSuccess NoticeKind = "success"
 	NoticeWarning NoticeKind = "warning"
 	NoticeError   NoticeKind = "error"
+)
+
+type TimelineItem struct {
+	Time  string
+	Title string
+	Body  string
+	Kind  NoticeKind
+}
+
+type Filter struct {
+	Label  string
+	Value  string
+	Target string
+	Active bool
+}
+
+type Field struct {
+	Label    string
+	Value    string
+	Hint     string
+	Required bool
+}
+
+type AddressFormat string
+
+const (
+	AddressFormatShort AddressFormat = "short"
+	AddressFormatLong  AddressFormat = "long"
+)
+
+type TxStatusKind string
+
+const (
+	TxStatusPending TxStatusKind = "pending"
+	TxStatusSuccess TxStatusKind = "success"
+	TxStatusFailed  TxStatusKind = "failed"
+	TxStatusExpired TxStatusKind = "expired"
 )

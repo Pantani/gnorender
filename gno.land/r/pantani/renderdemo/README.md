@@ -52,9 +52,11 @@ http://127.0.0.1:8888/r/pantani/renderdemo
 You should see a page containing:
 
 - `# Render Demo`
-- sections for overview, lists, markdown helpers, links and callouts, ASCII helpers, and code samples
-- a pager and tabs example
+- sections for overview, navigation, metrics, lists, data views, history/state, forms, ASCII helpers, and code samples
+- breadcrumbs, filter bars, pager, and tabs examples
 - badges, callouts, blockquotes, and a progress bar
+- metrics, stat grids, addresses, and tx statuses
+- timelines, diffs, object rendering, cards, and form previews
 - markdown tables created by both helper functions and `Table.Render()`
 - fenced ASCII output for `DrawPanel`, `DrawEmptyState`, and ASCII `Table.Render()`
 
