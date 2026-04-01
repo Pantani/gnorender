@@ -1,0 +1,36 @@
+package gnorender
+
+import (
+	"testing"
+
+	"gno.land/p/nt/uassert/v0"
+)
+
+func TestDrawTabsAndPager(t *testing.T) {
+	tabs := DrawTabs("clients", Tab{ID: "overview", Label: "Overview"}, Tab{ID: "clients", Label: "Clients"})
+	pager := DrawPager(2, 4, "/r/demo/render")
+
+	uassert.Equal(t, "Overview | [Clients]", tabs)
+	uassert.Equal(t, "Page 2/4 | [Prev](/r/demo/render?page=1) | [Next](/r/demo/render?page=3)", pager)
+}
+
+func TestDrawTabsLabelFallback(t *testing.T) {
+	got := DrawTabs("transfers",
+		Tab{ID: "overview", Label: "Overview"},
+		Tab{ID: "transfers"},
+		Tab{},
+	)
+
+	uassert.Equal(t, "Overview | [transfers]", got)
+}
+
+func TestDrawPagerWithExistingQuery(t *testing.T) {
+	got := DrawPager(3, 5, "/r/demo/render?limit=20")
+
+	uassert.Equal(t, "Page 3/5 | [Prev](/r/demo/render?limit=20&page=2) | [Next](/r/demo/render?limit=20&page=4)", got)
+}
+
+func TestDrawPagerBounds(t *testing.T) {
+	uassert.Equal(t, "Page 1/1", DrawPager(0, 0, "/r/demo/render"))
+	uassert.Equal(t, "Page 4/4 | [Prev](/r/demo/render?page=3)", DrawPager(9, 4, "/r/demo/render"))
+}
