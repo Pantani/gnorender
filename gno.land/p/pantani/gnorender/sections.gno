@@ -42,6 +42,31 @@ func DrawList(title string, items []string) string {
 	return DrawSection(title, sb.String())
 }
 
+func DrawDescriptionList(title string, pairs ...KV) string {
+	if len(pairs) == 0 {
+		return DrawSection(title, "No details.")
+	}
+
+	var sb strings.Builder
+	count := 0
+	for _, pair := range pairs {
+		line := strings.TrimSpace(DrawStatus(pair.Key, pair.Value))
+		if line == "" {
+			continue
+		}
+		if count > 0 {
+			sb.WriteByte('\n')
+		}
+		sb.WriteString("- ")
+		sb.WriteString(line)
+		count++
+	}
+	if count == 0 {
+		return DrawSection(title, "No details.")
+	}
+	return DrawSection(title, sb.String())
+}
+
 func DrawEmptyState(title, body string) string {
 	if strings.TrimSpace(body) == "" {
 		body = "No data."

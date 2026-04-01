@@ -14,6 +14,17 @@ func TestDrawTabsAndPager(t *testing.T) {
 	uassert.Equal(t, "Page 2/4 | [Prev](/r/demo/render?page=1) | [Next](/r/demo/render?page=3)", pager)
 }
 
+func TestDrawLinkAndLinkList(t *testing.T) {
+	link := DrawLink("Package Docs", "/p/pantani/gnorender")
+	list := DrawLinkList("Links",
+		Link{Label: "Package Docs", Target: "/p/pantani/gnorender"},
+		Link{Target: "/r/pantani/renderdemo"},
+	)
+
+	uassert.Equal(t, "[Package Docs](/p/pantani/gnorender)", link)
+	uassert.Equal(t, "## Links\n\n- [Package Docs](/p/pantani/gnorender)\n- [/r/pantani/renderdemo](/r/pantani/renderdemo)", list)
+}
+
 func TestDrawTabsLabelFallback(t *testing.T) {
 	got := DrawTabs("transfers",
 		Tab{ID: "overview", Label: "Overview"},

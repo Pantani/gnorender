@@ -18,14 +18,21 @@ func TestDrawTitleSectionAndDivider(t *testing.T) {
 func TestDrawListHelpers(t *testing.T) {
 	list := DrawList("Ports", []string{"transfer", "bank"})
 	ordered := DrawOrderedList("Steps", []string{"Create client", "Send packet"})
+	details := DrawDescriptionList(
+		"Metadata",
+		KV{Key: "Source", Value: "AtomOne"},
+		KV{Key: "Destination", Value: "Gno"},
+	)
 
 	uassert.Equal(t, "## Ports\n\n- transfer\n- bank", list)
 	uassert.Equal(t, "## Steps\n\n1. Create client\n2. Send packet", ordered)
+	uassert.Equal(t, "## Metadata\n\n- **Source:** AtomOne\n- **Destination:** Gno", details)
 }
 
 func TestDrawListEmpty(t *testing.T) {
 	uassert.Equal(t, "## Ports\n\nNo items.", DrawList("Ports", nil))
 	uassert.Equal(t, "## Steps\n\nNo items.", DrawOrderedList("Steps", nil))
+	uassert.Equal(t, "## Metadata\n\nNo details.", DrawDescriptionList("Metadata"))
 }
 
 func TestDrawCodeBlockAndStatus(t *testing.T) {

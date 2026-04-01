@@ -6,6 +6,43 @@ import (
 	"gno.land/p/nt/ufmt/v0"
 )
 
+func DrawLink(label, target string) string {
+	label = normalizeInline(label)
+	target = strings.TrimSpace(target)
+	if label == "" {
+		label = target
+	}
+	if label == "" {
+		return ""
+	}
+	return markdownLink(label, target)
+}
+
+func DrawLinkList(title string, links ...Link) string {
+	if len(links) == 0 {
+		return DrawSection(title, "No links.")
+	}
+
+	var sb strings.Builder
+	count := 0
+	for _, link := range links {
+		item := DrawLink(link.Label, link.Target)
+		if item == "" {
+			continue
+		}
+		if count > 0 {
+			sb.WriteByte('\n')
+		}
+		sb.WriteString("- ")
+		sb.WriteString(item)
+		count++
+	}
+	if count == 0 {
+		return DrawSection(title, "No links.")
+	}
+	return DrawSection(title, sb.String())
+}
+
 func DrawTabs(selected string, tabs ...Tab) string {
 	var labels []string
 	for _, tab := range tabs {

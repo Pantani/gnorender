@@ -19,8 +19,12 @@ import "gno.land/p/pantani/gnorender"
 - ASCII tables
 - Panels and empty states
 - Bullet and ordered lists
+- Description lists
+- Links and link lists
 - Tabs and pager links
 - Status lines
+- Badges and callouts
+- Blockquotes and progress bars
 - Code blocks
 
 ## File Organization
@@ -28,10 +32,10 @@ import "gno.land/p/pantani/gnorender"
 The package is split by responsibility:
 
 - `types.gno`: exported enums and structs
-- `sections.gno`: titles, sections, dividers, lists, and empty states
-- `formatting.gno`: ordered lists, status lines, and code blocks
+- `sections.gno`: titles, sections, dividers, lists, description lists, and empty states
+- `formatting.gno`: ordered lists, status lines, badges, callouts, blockquotes, progress bars, and code blocks
 - `panel.gno`: box rendering helpers
-- `navigation.gno`: tabs and pager helpers
+- `navigation.gno`: links, tabs, pager helpers
 - `table.gno`: markdown and ASCII tables
 - `helpers.gno`: shared string formatting helpers
 
@@ -72,15 +76,30 @@ type KV struct {
 	Value string
 }
 
+type Link struct {
+	Label  string
+	Target string
+}
+
 type Tab struct {
 	ID    string
 	Label string
 }
+
+type NoticeKind string
+
+const (
+	NoticeInfo    NoticeKind = "info"
+	NoticeSuccess NoticeKind = "success"
+	NoticeWarning NoticeKind = "warning"
+	NoticeError   NoticeKind = "error"
+)
 ```
 
 `Format`, `Align`, `Column`, and `Table` are used together through
-`Table.Render()`. `KV` is used by `DrawKVTable`, and `Tab` is used by
-`DrawTabs`.
+`Table.Render()`. `KV` is used by `DrawKVTable` and `DrawDescriptionList`,
+`Link` is used by `DrawLinkList`, `Tab` is used by `DrawTabs`, and
+`NoticeKind` is used by `DrawBadge` and `DrawCallout`.
 
 ## Quick Start
 
@@ -186,6 +205,25 @@ Output:
 2. Send packet
 ```
 
+### DrawDescriptionList
+
+```go
+gnorender.DrawDescriptionList(
+	"Metadata",
+	gnorender.KV{Key: "Source", Value: "AtomOne"},
+	gnorender.KV{Key: "Destination", Value: "Gno"},
+)
+```
+
+Output:
+
+```md
+## Metadata
+
+- **Source:** AtomOne
+- **Destination:** Gno
+```
+
 ### DrawStatus
 
 ```go
@@ -196,6 +234,61 @@ Output:
 
 ```md
 **Client:** active
+```
+
+### DrawBadge
+
+```go
+gnorender.DrawBadge(gnorender.NoticeSuccess, "Ready")
+```
+
+Output:
+
+```md
+🟢 Ready
+```
+
+### DrawBlockquote
+
+```go
+gnorender.DrawBlockquote("Lightweight note\nwith multiple lines.")
+```
+
+Output:
+
+```md
+> Lightweight note
+> with multiple lines.
+```
+
+### DrawCallout
+
+```go
+gnorender.DrawCallout(
+	gnorender.NoticeWarning,
+	"Pending packets",
+	"Drain the queue before upgrade.",
+)
+```
+
+Output:
+
+```md
+> **🟡 Warning: Pending packets**
+>
+> Drain the queue before upgrade.
+```
+
+### DrawProgressBar
+
+```go
+gnorender.DrawProgressBar("Sync", 3, 10, 10)
+```
+
+Output:
+
+```md
+**Sync:** `[###-------] 30% (3/10)`
 ```
 
 ### DrawCodeBlock
@@ -266,6 +359,37 @@ Output:
 +-------------------------+
 | No vouchers minted yet. |
 +-------------------------+
+```
+
+### DrawLink
+
+```go
+gnorender.DrawLink("Package Docs", "/p/pantani/gnorender")
+```
+
+Output:
+
+```md
+[Package Docs](/p/pantani/gnorender)
+```
+
+### DrawLinkList
+
+```go
+gnorender.DrawLinkList(
+	"Links",
+	gnorender.Link{Label: "Package Docs", Target: "/p/pantani/gnorender"},
+	gnorender.Link{Label: "Demo Realm", Target: "/r/pantani/renderdemo"},
+)
+```
+
+Output:
+
+```md
+## Links
+
+- [Package Docs](/p/pantani/gnorender)
+- [Demo Realm](/r/pantani/renderdemo)
 ```
 
 ### DrawTabs
@@ -525,5 +649,6 @@ Nothing to show.
 - Markdown tables escape `|` and convert line breaks inside cells to `<br>`.
 - Empty markdown tables render a single row with the empty message in the first column.
 - Empty ASCII tables widen themselves when needed so the empty message fits inside the border.
+- Semantic colors are exposed through badges and callouts using colored icons so they remain visible in Markdown renderers.
 - ASCII helpers such as `DrawPanel` and `DrawEmptyState` should be wrapped with `DrawCodeBlock` when shown through Markdown renderers like `gnoweb`.
 - `DrawPager` appends `?page=N` or `&page=N` automatically.

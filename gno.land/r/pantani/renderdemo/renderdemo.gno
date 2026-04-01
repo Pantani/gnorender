@@ -12,6 +12,7 @@ func Render(path string) string {
 		joinBlocks(
 			gnorender.DrawStatus("Library", "working"),
 			gnorender.DrawStatus("Path", path),
+			gnorender.DrawProgressBar("Showcase Coverage", 22, 22, 22),
 			gnorender.DrawTabs(
 				"showcase",
 				gnorender.Tab{ID: "overview", Label: "Overview"},
@@ -36,6 +37,11 @@ func Render(path string) string {
 				"Inspect each helper output",
 				"Reuse the snippets in your own realms",
 			}),
+			gnorender.DrawDescriptionList(
+				"DrawDescriptionList",
+				gnorender.KV{Key: "Primary format", Value: string(gnorender.FormatMarkdown)},
+				gnorender.KV{Key: "ASCII format", Value: string(gnorender.FormatASCII)},
+			),
 		),
 	)
 
@@ -74,6 +80,43 @@ func Render(path string) string {
 				Title: "Table Without Columns",
 				Empty: "Nothing to show.",
 			}.Render(),
+		),
+	)
+
+	linksAndCallouts := gnorender.DrawSection(
+		"Links And Callouts",
+		joinBlocks(
+			gnorender.DrawSection("DrawLink", gnorender.DrawLink("Open the package docs", "/p/pantani/gnorender")),
+			gnorender.DrawLinkList(
+				"DrawLinkList",
+				gnorender.Link{Label: "Package README", Target: "/p/pantani/gnorender"},
+				gnorender.Link{Label: "Refresh Demo", Target: "/r/pantani/renderdemo"},
+			),
+			gnorender.DrawSection(
+				"DrawBadge",
+				joinBlocks(
+					gnorender.DrawBadge(gnorender.NoticeInfo, "Info"),
+					gnorender.DrawBadge(gnorender.NoticeSuccess, "Success"),
+					gnorender.DrawBadge(gnorender.NoticeWarning, "Warning"),
+					gnorender.DrawBadge(gnorender.NoticeError, "Error"),
+				),
+			),
+			gnorender.DrawBlockquote("Blockquotes are handy for lightweight notes and commentary."),
+			gnorender.DrawCallout(
+				gnorender.NoticeInfo,
+				"Markdown-native callout",
+				"Use this when you want emphasis without relying on ASCII layout.",
+			),
+			gnorender.DrawCallout(
+				gnorender.NoticeWarning,
+				"ASCII helpers",
+				"Wrap panels and other ASCII blocks in DrawCodeBlock when rendering through gnoweb.",
+			),
+			gnorender.DrawCallout(
+				gnorender.NoticeSuccess,
+				"Progress",
+				gnorender.DrawProgressBar("Manual review", 9, 10, 10),
+			),
 		),
 	)
 
@@ -128,6 +171,8 @@ func Render(path string) string {
 		sectionsAndLists,
 		gnorender.DrawDivider(),
 		markdownHelpers,
+		gnorender.DrawDivider(),
+		linksAndCallouts,
 		gnorender.DrawDivider(),
 		asciiHelpers,
 		gnorender.DrawDivider(),

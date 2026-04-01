@@ -34,7 +34,21 @@ type KV struct {
 	Value string
 }
 
+type Link struct {
+	Label  string
+	Target string
+}
+
 type Tab struct {
 	ID    string
 	Label string
 }
+
+type NoticeKind string
+
+const (
+	NoticeInfo    NoticeKind = "info"
+	NoticeSuccess NoticeKind = "success"
+	NoticeWarning NoticeKind = "warning"
+	NoticeError   NoticeKind = "error"
+)
