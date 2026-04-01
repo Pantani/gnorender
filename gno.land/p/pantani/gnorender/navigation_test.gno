@@ -31,6 +31,12 @@ func TestDrawLinkNormalizesRootSections(t *testing.T) {
 	uassert.Equal(t, "[Examples](/e/)", DrawLink("Examples", "/e"))
 }
 
+func TestDrawLinkListEmptyAfterFiltering(t *testing.T) {
+	got := DrawLinkList("Links", Link{}, Link{Label: "   "})
+
+	uassert.Equal(t, "## Links\n\nNo links.", got)
+}
+
 func TestDrawTabsLabelFallback(t *testing.T) {
 	got := DrawTabs("transfers",
 		Tab{ID: "overview", Label: "Overview"},

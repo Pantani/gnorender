@@ -152,3 +152,18 @@ func TestMarkdownTableEscapesCells(t *testing.T) {
 | :--- | :--- |
 | a\|b | line 1<br>line 2 |`, got)
 }
+
+func TestTableRenderMarkdownAutoExpandsColumns(t *testing.T) {
+	got := Table{
+		Columns: []Column{
+			{Label: "Key"},
+		},
+		Rows: [][]string{
+			{"chain_id", "dev"},
+		},
+	}.Render()
+
+	uassert.Equal(t, `| Key |  |
+| :--- | :--- |
+| chain_id | dev |`, got)
+}

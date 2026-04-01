@@ -40,3 +40,15 @@ func TestDrawBadge(t *testing.T) {
 	uassert.Equal(t, "🟢 Ready", DrawBadge(NoticeSuccess, "Ready"))
 	uassert.Equal(t, "⚪", DrawBadge("", ""))
 }
+
+func TestDrawProgressBarClampsCurrent(t *testing.T) {
+	got := DrawProgressBar("Sync", 20, 10, 5)
+
+	uassert.Equal(t, "**Sync:** `[#####] 100% (10/10)`", got)
+}
+
+func TestDrawCodeBlockAddsTrailingNewline(t *testing.T) {
+	got := DrawCodeBlock("go", "println(\"hi\")")
+
+	uassert.Equal(t, "```go\nprintln(\"hi\")\n```", got)
+}

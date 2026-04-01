@@ -22,6 +22,11 @@ func TestDrawChecklist(t *testing.T) {
   Waiting on audit`, got)
 }
 
+func TestDrawChecklistFallbacks(t *testing.T) {
+	uassert.Equal(t, "## Checklist\n\nNo checklist items.", DrawChecklist("Checklist"))
+	uassert.Equal(t, "## Checklist\n\nNo checklist items.", DrawChecklist("Checklist", ChecklistItem{}, ChecklistItem{Label: "   "}))
+}
+
 func TestDrawVoteBreakdown(t *testing.T) {
 	got := DrawVoteBreakdown("Tally", VoteBreakdown{Yes: 6, No: 2, Abstain: 1, Veto: 1})
 
@@ -33,6 +38,12 @@ func TestDrawVoteBreakdown(t *testing.T) {
 | 🔴 No | 2 | 20% | [##--------] 20% |
 | 🔵 Abstain | 1 | 10% | [#---------] 10% |
 | 🟡 Veto | 1 | 10% | [#---------] 10% |`, got)
+}
+
+func TestDrawVoteBreakdownEmpty(t *testing.T) {
+	got := DrawVoteBreakdown("Tally", VoteBreakdown{})
+
+	uassert.Equal(t, "## Tally\n\nNo votes.", got)
 }
 
 func TestDrawEventLog(t *testing.T) {
@@ -54,6 +65,11 @@ func TestDrawEventLog(t *testing.T) {
 - `+"`12:00`"+` · **transfer** · packet sent
   **sender:** alice
   **receiver:** bob`, got)
+}
+
+func TestDrawEventLogFallbacks(t *testing.T) {
+	uassert.Equal(t, "## Events\n\nNo events.", DrawEventLog("Events"))
+	uassert.Equal(t, "## Events\n\n- **event** · queued", DrawEventLog("Events", EventEntry{Summary: "queued"}))
 }
 
 func TestDrawTxReceipt(t *testing.T) {
@@ -91,6 +107,12 @@ func TestDrawTxReceipt(t *testing.T) {
   **amount:** 10ugnot`, got)
 }
 
+func TestDrawTxReceiptMinimal(t *testing.T) {
+	got := DrawTxReceipt(TxReceipt{Status: TxStatusPending})
+
+	uassert.Equal(t, "## Tx Receipt\n\n**Tx:** 🟡 Pending", got)
+}
+
 func TestDrawComparisonTable(t *testing.T) {
 	got := DrawComparisonTable(
 		"Comparison",
@@ -106,6 +128,21 @@ func TestDrawComparisonTable(t *testing.T) {
 | Fee | 10 | 10 | 🔵 Same |`, got)
 }
 
+func TestDrawComparisonTableFallbacks(t *testing.T) {
+	got := DrawComparisonTable(
+		"Comparison",
+		ComparisonRow{Before: "", After: "enabled"},
+		ComparisonRow{Field: "Owner", Before: "alice", After: ""},
+	)
+
+	uassert.Equal(t, `### Comparison
+
+| Field | Before | After | Change |
+| :--- | :--- | :--- | :--- |
+| Value |  | enabled | 🟢 Added |
+| Owner | alice |  | 🟡 Removed |`, got)
+}
+
 func TestDrawLegend(t *testing.T) {
 	got := DrawLegend(
 		"Legend",
@@ -119,10 +156,24 @@ func TestDrawLegend(t *testing.T) {
 - 🟡 Pending: Needs attention`, got)
 }
 
+func TestDrawLegendFallbacks(t *testing.T) {
+	got := DrawLegend("Legend", LegendItem{Kind: NoticeError, Description: "Needs attention"})
+
+	uassert.Equal(t, `## Legend
+
+- 🔴 Error: Needs attention`, got)
+}
+
 func TestDrawEmptyStateWithAction(t *testing.T) {
 	got := DrawEmptyStateWithAction("Balances", "No balances yet.", Link{Label: "Create account", Target: "/r/demo/create"})
 
 	uassert.Equal(t, "```text\n+------------------+\n|     Balances     |\n+------------------+\n| No balances yet. |\n+------------------+\n```\n\n**Next:** [Create account](/r/demo/create)", got)
+}
+
+func TestDrawEmptyStateWithActionWithoutAction(t *testing.T) {
+	got := DrawEmptyStateWithAction("Balances", "No balances yet.", Link{})
+
+	uassert.Equal(t, "```text\n+------------------+\n|     Balances     |\n+------------------+\n| No balances yet. |\n+------------------+\n```", got)
 }
 
 func TestDrawTabsNav(t *testing.T) {
@@ -133,4 +184,14 @@ func TestDrawTabsNav(t *testing.T) {
 	)
 
 	uassert.Equal(t, "[Overview] | [Showcase](/r/demo?tab=showcase) | Settings", got)
+}
+
+func TestDrawTabsNavFallbacks(t *testing.T) {
+	got := DrawTabsNav("Settings",
+		Tab{ID: "overview", Label: "Overview", Target: "/r"},
+		Tab{ID: "cfg", Label: "Settings", Target: "/r/demo?tab=settings"},
+		Tab{},
+	)
+
+	uassert.Equal(t, "[Overview](/r/) | [Settings]", got)
 }

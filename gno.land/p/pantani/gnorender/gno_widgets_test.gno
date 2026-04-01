@@ -14,6 +14,14 @@ func TestDrawRealmAndPackageHeader(t *testing.T) {
 	uassert.Equal(t, "# gnorender\n\n**Import:** [/p/pantani/gnorender](/p/pantani/gnorender)\n\n**Version:** v0.1.0", pkg)
 }
 
+func TestDrawRealmAndPackageHeaderFallbacks(t *testing.T) {
+	realm := DrawRealmHeader("Render Demo", "", "", "")
+	pkg := DrawPackageHeader("Packages", "/p", "")
+
+	uassert.Equal(t, "# Render Demo", realm)
+	uassert.Equal(t, "# Packages\n\n**Import:** [/p/](/p/)", pkg)
+}
+
 func TestDrawMethodList(t *testing.T) {
 	got := DrawMethodList(
 		"Methods",
@@ -27,6 +35,16 @@ func TestDrawMethodList(t *testing.T) {
 | :--- | :--- | :--- |
 | Render | Render(path string) string | Renders the realm view |
 | List | List() []string | Returns items |`, got)
+}
+
+func TestDrawMethodListFallbacks(t *testing.T) {
+	got := DrawMethodList("Methods", Method{})
+
+	uassert.Equal(t, `### Methods
+
+| Method | Signature | Description |
+| :--- | :--- | :--- |
+| Method | Method() |  |`, got)
 }
 
 func TestDrawBalanceListAndCoins(t *testing.T) {
@@ -51,6 +69,10 @@ func TestDrawBalanceListAndCoins(t *testing.T) {
 | Denom | Amount | Value |
 | :--- | ---: | :--- |
 | ugnot | 1500 | $15.00 |`, coins)
+}
+
+func TestDrawBalanceListEmpty(t *testing.T) {
+	uassert.Equal(t, "## Balances\n\nNo balances.", DrawBalanceList("Balances"))
 }
 
 func TestDrawProposalSummaryAndGovernanceTally(t *testing.T) {
@@ -92,6 +114,18 @@ Adds richer UI widgets.
 | 🟡 Veto | 0 | 0% | [----------] 0% |`, tally)
 }
 
+func TestDrawProposalSummaryFallbacks(t *testing.T) {
+	proposal := DrawProposalSummary(ProposalSummary{})
+	tally := DrawGovernanceTally("Governance Tally", VoteBreakdown{})
+
+	uassert.Equal(t, `## Proposal
+
+## Details
+
+- **Status:** 🔵 Unknown`, proposal)
+	uassert.Equal(t, "## Governance Tally\n\nNo votes.", tally)
+}
+
 func TestDrawValidatorListAndAddressBook(t *testing.T) {
 	validators := DrawValidatorList(
 		"Validators",
@@ -112,6 +146,18 @@ func TestDrawValidatorListAndAddressBook(t *testing.T) {
 | Name | Address | Note |
 | :--- | :--- | :--- |
 | Treasury | g1abcdef...qrstuv | Main vault |`, addressBook)
+}
+
+func TestDrawValidatorListAndAddressBookFallbacks(t *testing.T) {
+	validators := DrawValidatorList("Validators")
+	addressBook := DrawAddressBook("Address Book", AddressEntry{})
+
+	uassert.Equal(t, "## Validators\n\nNo validators.", validators)
+	uassert.Equal(t, `### Address Book
+
+| Name | Address | Note |
+| :--- | :--- | :--- |
+| entry |  |  |`, addressBook)
 }
 
 func TestDrawContractMetadataAndRealmIndex(t *testing.T) {
@@ -142,4 +188,16 @@ A realm used to preview helper output.
 
 - [Overview](/r/pantani/renderdemo)
 - [Methods](/r/pantani/renderdemo?tab=methods): API surface`, index)
+}
+
+func TestDrawContractMetadataAndRealmIndexFallbacks(t *testing.T) {
+	meta := DrawContractMetadata(ContractMetadata{Path: "/r"})
+	index := DrawRealmIndex("Realm Index", RealmPage{}, RealmPage{Target: "/r/demo"})
+
+	uassert.Equal(t, `## Contract Metadata
+
+## Metadata
+
+- **Path:** [/r/](/r/)`, meta)
+	uassert.Equal(t, "## Realm Index\n\nNo pages.", index)
 }

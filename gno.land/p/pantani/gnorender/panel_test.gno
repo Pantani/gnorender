@@ -16,3 +16,11 @@ func TestDrawPanel(t *testing.T) {
 | Voucher minted |
 +----------------+`, got)
 }
+
+func TestDrawPanelTitleOnly(t *testing.T) {
+	got := DrawPanel("Status", "")
+
+	uassert.Equal(t, `+--------+
+| Status |
++--------+`, got)
+}

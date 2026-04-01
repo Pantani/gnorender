@@ -33,6 +33,14 @@ func TestDrawMetricAndStatGrid(t *testing.T) {
 | Errors | 1 | 🟡 -1 |`, grid)
 }
 
+func TestDrawMetricAndStatGridFallbacks(t *testing.T) {
+	metric := DrawMetric(Metric{Kind: NoticeInfo})
+	grid := DrawStatGrid("Stats")
+
+	uassert.Equal(t, "- · 🔵 Info", metric)
+	uassert.Equal(t, "## Stats\n\nNo stats.", grid)
+}
+
 func TestDrawTimeline(t *testing.T) {
 	got := DrawTimeline(
 		"Timeline",
@@ -53,10 +61,20 @@ func TestDrawDiff(t *testing.T) {
 	uassert.Equal(t, "## State Diff\n\n```diff\n- old\n+ new\n```", got)
 }
 
+func TestDrawDiffNoChanges(t *testing.T) {
+	uassert.Equal(t, "## State Diff\n\nNo changes.", DrawDiff("State Diff", "same", "same"))
+	uassert.Equal(t, "No changes.", DrawDiff("", "same", "same"))
+}
+
 func TestDrawAddress(t *testing.T) {
 	got := DrawAddress("Owner", "g1abcdefghijklmno123456789pqrstuv", AddressFormatShort)
 
 	uassert.Equal(t, "**Owner:** `g1abcdef...qrstuv`", got)
+}
+
+func TestDrawAddressFallbacks(t *testing.T) {
+	uassert.Equal(t, "`g1abcdefghijklmno123456789pqrstuv`", DrawAddress("", "g1abcdefghijklmno123456789pqrstuv", AddressFormatLong))
+	uassert.Equal(t, "Owner", DrawAddress("Owner", "", AddressFormatShort))
 }
 
 func TestDrawTxStatus(t *testing.T) {
@@ -76,12 +94,23 @@ func TestDrawFilterBar(t *testing.T) {
 	uassert.Equal(t, "**Filters:** [Status: Open] | [Sort: Newest](/demo?sort=newest) | Owner: pantani", got)
 }
 
+func TestDrawFilterBarFallbacks(t *testing.T) {
+	got := DrawFilterBar("Filters", Filter{}, Filter{Label: "   "})
+
+	uassert.Equal(t, "**Filters:** No filters.", got)
+}
+
 func TestDrawCard(t *testing.T) {
 	got := DrawCard("Treasury", "120,000 ATOM available.")
 
 	uassert.Equal(t, `> **Treasury**
 >
 > 120,000 ATOM available.`, got)
+}
+
+func TestDrawCardFallbacks(t *testing.T) {
+	uassert.Equal(t, "> Body only", DrawCard("", "Body only"))
+	uassert.Equal(t, "", DrawCard("", ""))
 }
 
 func TestDrawFieldAndFormPreview(t *testing.T) {
@@ -113,4 +142,9 @@ func TestDrawObject(t *testing.T) {
 	)
 
 	uassert.Equal(t, "## Config\n\n```json\n{\n  \"chain_id\": \"dev\",\n  \"owner\": \"pantani\"\n}\n```", got)
+}
+
+func TestDrawFormPreviewAndObjectEmpty(t *testing.T) {
+	uassert.Equal(t, "## Form Preview\n\nNo fields.", DrawFormPreview("Form Preview"))
+	uassert.Equal(t, "## Config\n\nNo fields.", DrawObject("Config"))
 }
