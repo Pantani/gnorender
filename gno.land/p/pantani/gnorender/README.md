@@ -229,6 +229,13 @@ Output:
 +----------------+
 ```
 
+When rendering inside Markdown surfaces such as `gnoweb`, wrap ASCII output in
+`DrawCodeBlock` so spacing and line breaks are preserved:
+
+```go
+gnorender.DrawCodeBlock("text", gnorender.DrawPanel("Transfer", "Escrow ready\nVoucher minted"))
+```
+
 ### DrawEmptyState
 
 ```go
@@ -518,4 +525,5 @@ Nothing to show.
 - Markdown tables escape `|` and convert line breaks inside cells to `<br>`.
 - Empty markdown tables render a single row with the empty message in the first column.
 - Empty ASCII tables widen themselves when needed so the empty message fits inside the border.
+- ASCII helpers such as `DrawPanel` and `DrawEmptyState` should be wrapped with `DrawCodeBlock` when shown through Markdown renderers like `gnoweb`.
 - `DrawPager` appends `?page=N` or `&page=N` automatically.

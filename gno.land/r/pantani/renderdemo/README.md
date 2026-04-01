@@ -1,11 +1,12 @@
 # RenderDemo
 
-`RenderDemo` is a tiny example realm that imports
+`RenderDemo` is a small showcase realm that imports
 `gno.land/p/pantani/gnorender` and renders a simple page using the helper
 library.
 
 It is useful for manually validating that the package composes well inside a
-real `Render(path string) string` function.
+real `Render(path string) string` function, including every exported helper and
+all exported types.
 
 ## Files
 
@@ -51,9 +52,10 @@ http://127.0.0.1:8888/r/pantani/renderdemo
 You should see a page containing:
 
 - `# Render Demo`
-- `**Library:** working`
-- a markdown table with helper names
-- an ASCII panel titled `Manual Test`
+- sections for overview, lists, markdown helpers, ASCII helpers, and code samples
+- a pager and tabs example
+- markdown tables created by both helper functions and `Table.Render()`
+- fenced ASCII output for `DrawPanel`, `DrawEmptyState`, and ASCII `Table.Render()`
 
 This is the quickest end-to-end way to verify the library visually.
 
